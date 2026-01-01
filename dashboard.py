@@ -310,6 +310,7 @@ if current_price:
                 ax_bound.invert_xaxis() # Invert axis to visualize time passing towards the left
         
                 st.pyplot(fig_bound)
+                plt.close(fig_bound)
 
 
     # TAB 2: GREEKS VISUALIZATION
@@ -359,6 +360,7 @@ if current_price:
         axes[1, 1].grid(True, alpha=0.3)
         
         st.pyplot(fig2)
+        plt.close(fig2)
 
         st.divider()
         st.subheader("Greeks 3D Surface (Heatmap)")
@@ -396,6 +398,7 @@ if current_price:
         ax_heat.set_ylabel("Time to Expiration (Years)")
         
         st.pyplot(fig_heat)
+        plt.close(fig_heat)
         st.info("💡 **How to read:** Higher color intensity indicates higher sensitivity to the parameter.")
 
     # TAB 3: P&L
@@ -441,6 +444,7 @@ if current_price:
         ax_pnl.legend()
     
         st.pyplot(fig_pnl)
+        plt.close(fig_pnl)
 
     # TAB 4: MONTE CARLO
     with tab4:
@@ -489,6 +493,7 @@ if current_price:
                 ax_mc.set_ylabel("Stock Price ($)")
                 ax_mc.legend(loc='upper left')
                 st.pyplot(fig_mc)
+                plt.close(fig_mc)
             else:
                 st.info("Adjust settings on the left and click 'Run Simulation' to visualize the price paths.")
                 
@@ -601,6 +606,7 @@ if current_price:
             ax_var.grid(True, alpha=0.2, linestyle='--')
 
             st.pyplot(fig_var)
+            plt.close(fig_var)
             
             # Contextual Text
             st.info(
