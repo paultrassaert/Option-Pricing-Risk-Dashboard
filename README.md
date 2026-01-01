@@ -123,21 +123,50 @@ Option-Pricing-Dashboard/
 ├── LICENSE                      # GPLv3 License
 └── README.md                    # Project documentation
 ```
+### Key File Descriptions
+dashboard.py The frontend of the application built with Streamlit. It orchestrates the calculation flow, renders interactive charts (Matplotlib/Seaborn), and manages the session state for a smooth user experience.
+
+models.py Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
+
+pricing_american_option.py The core computational engine for American Options. It implements advanced numerical methods:
+
+Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
+
+Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
+
+Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
+
+Analytic Approximation: Bjerksund-Stensland (2002) model.
+
+test_models.py A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
 
 ---
 
-## Testing
+## Testing & Validation
 
-Reliability is paramount in quantitative finance. This project includes a test suite using Pytest.
+Reliability is paramount in quantitative finance. This project includes a rigorous test suite (using `pytest`) divided into two categories: Financial Logic and Numerical Convergenc*.
 
-**Tests cover:**
-* Theoretical accuracy (vs Textbook examples).
-* Put-Call Parity checks (Arbitrage-free conditions).
-* Implied Volatility "Round-Trip" (Input $\sigma$ $\to$ Price $\to$ Solver $\to$ Output $\sigma$).
+### 1. European & Market Logic (`test_models.py`)
+Validates the fundamental "laws" of financial mathematics:
+* **Arbitrage Constraints:** Verifies **Put-Call Parity** ($C - P = S - K e^{-rT}$) to ensure no arbitrage opportunities exist.
+* **Greeks Consistency:** Checks mathematical relationships, such as $\Delta_{Call} - \Delta_{Put} = e^{-qT}$.
+* **Calibration:** Performs an "Implied Volatility Round-Trip" (Input $\sigma \to$ Price $\to$ Solver $\to$ Output $\sigma$) to validate the Newton-Raphson solver.
+* **Monte Carlo:** Verifies that European simulations converge to the analytical Black-Scholes price.
 
+### 2. American & Numerical Engines (`test_pricing_american.py`)
+Ensures that different numerical methods yield consistent results for complex options:
+* **Model Cross-Validation:** Asserts that **Binomial Trees**, **Trinomial Trees**, and **PDE (Finite Difference)** converge to the same price (within $<1\%$ tolerance).
+* **Edge Cases:** Validates Deep In-The-Money (ITM) conditions and Payoff at Maturity ($T=0$).
+* **Dividend Impact:** Verifies that an American Call on a non-dividend paying stock equals the European price.
+* **Longstaff-Schwartz:** Checks that the stochastic Least-Squares method aligns with analytical benchmarks.
+
+### Run the tests
 To run the tests:
 ```bash
 pytest test_models.py
+```
+```bash
+pytest test_pricing_american.py
 ```
 
 ---
@@ -150,6 +179,6 @@ pytest test_models.py
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the GPLv3 License. See `LICENSE` for more information.
 
 **Author:** Paul Trassaert - *Mathematical & Computer Science Student*
