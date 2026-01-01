@@ -20,6 +20,7 @@ This project is an Option Pricing & Risk Management Dashboard built with Python 
 Designed for quants and traders, it fetches real-time market data to perform live risk analysis, visualizing non-linear sensitivities (3D Greeks), calculating Value at Risk (VaR), and determining optimal early exercise boundaries.
 
 It solves a common problem: **How to accurately value American options and visualize non-linear portfolio risks?**
+The engine is optimized with advanced caching mechanisms to ensure near-instantaneous recalculations of complex numerical grids.
 
 ## Key Features
 
@@ -27,13 +28,13 @@ It solves a common problem: **How to accurately value American options and visua
 Compare valuation across 6 different mathematical models:
 * **Black-Scholes-Merton:** Baseline for European options.
 * **Bjerksund-Stensland (2002):** Closed-form approximation for American options.
-* **Binomial & Trinomial Trees:** Cox-Ross-Rubinstein models (CRJ) for lattice-based pricing.
+* **Binomial & Trinomial Trees:** Cox-Ross-Rubinstein models (CRR) for lattice-based pricing.
 * **Finite Difference Method (FDM):** Solves the PDE using the Theta-scheme (Implicit/Crank-Nicolson).
 * **Monte Carlo (Longstaff-Schwartz):** Least Squares Method (LSM) for American options simulation.
 
 ### Advanced Risk Analytics
 * **Greeks Visualization:** Interactive 2D plots and **3D Heatmaps** for Delta, Gamma, Vega, Theta, and Rho.
-* **Optimal Exercise Boundary:** visualizes the precise price/time threshold where early exercise becomes optimal.
+* **Optimal Exercise Boundary:** Visualizes the precise price/time threshold where early exercise becomes optimal.
 * **Value at Risk (VaR):** Estimates portfolio risk using stochastic simulations with confidence intervals (95%, 99%).
 * **P&L Projections:** Dynamic profit/loss analysis based on position size and expiration scenarios.
 
@@ -52,8 +53,6 @@ Black-Scholes-Merton provides the baseline for European valuations.
 
 <div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20C(S,t)=S_t%20e^{-q(T-t)}N(d_1)-Ke^{-r(T-t)}N(d_2)" alt="Black Scholes with Divs" /> </div>
 
-# Exemple pour le GBM
-$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
 
 ### 2. Lattice Methods (American)
 We use the Cox-Ross-Rubinstein (CRR) binomial model. The price is solved via backward induction, checking for optimal exercise at every node.
@@ -128,23 +127,23 @@ Option-Pricing-Dashboard/
 ```
 ### Key File Descriptions
 
-`dashboard.py` The frontend of the application built with Streamlit. It orchestrates the calculation flow, renders interactive charts (Matplotlib/Seaborn), and manages the session state for a smooth user experience.
+`dashboard.py`: The frontend of the application built with Streamlit. It orchestrates the calculation flow, renders interactive charts (Matplotlib/Seaborn), and manages the session state for a smooth user experience.
 
-`models.py` Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
+`models.py`: Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
 
-`pricing_american_option.py` The core computational engine for American Options. It implements advanced numerical methods:
+`pricing_american_option.py`: The core computational engine for American Options. It implements advanced numerical methods:
 * Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
 * Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
 * Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
 * Analytic Approximation: Bjerksund-Stensland (2002) model.
 
-`test_models.py` A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
+`test_models.py`: A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
 
 ---
 
 ## Testing & Validation
 
-Reliability is paramount in quantitative finance. This project includes a rigorous test suite (using `pytest`) divided into two categories: Financial Logic and Numerical Convergenc*.
+Reliability is paramount in quantitative finance. This project includes a rigorous test suite (using `pytest`) divided into two categories: Financial Logic and Numerical Convergence.
 
 ### 1. European & Market Logic (`test_models.py`)
 Validates the fundamental "laws" of financial mathematics:
