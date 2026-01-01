@@ -1,14 +1,13 @@
 # ---- IMPORTS BIBLIOGRAPHY ---
 
 import numpy as np
-import scipy.stats
 from scipy.stats import norm
 import yfinance as yf
 import pandas as pd
 
 # ---- BLACK-SCHOLES ----
 
-def black_scholes(S, K, T, r, sigma,  option_type = "call"):
+def black_scholes(S, K, T, r, q, sigma, option_type = "call"):
     """
     Calculates the price of a European option using the Black-Scholes model.
 
@@ -16,16 +15,17 @@ def black_scholes(S, K, T, r, sigma,  option_type = "call"):
     K: Exercise price (Strike)
     T: Time to maturity (in years)
     r: Risk-free interest rate (e.g., 0.05 for 5%)
+    q: Dividend yield (e.g., 0.02 for 2%)
     sigma: Volatility (e.g., 0.2 for 20%)
     option_type: "call" or "put"
     """
-    d1 = (np.log(S/K) + (r+sigma**2/2)*T) / (sigma * np.sqrt(T))
+    d1 = (np.log(S/K) + (r - q + sigma**2/2)*T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
 
     if option_type.lower() == "call":
-        price = S * norm.cdf(d1) - K * np.exp(-r*T) * norm.cdf(d2)
+        price = S * np.exp(-q*T) * norm.cdf(d1) - K * np.exp(-r*T) * norm.cdf(d2)
     elif option_type.lower() == "put":
-        price = K * np.exp(-r*T) * norm.cdf(-d2) - S * norm.cdf(-d1)
+        price = K * np.exp(-r*T) * norm.cdf(-d2) - S * np.exp(-q*T) * norm.cdf(-d1)
     else : 
         raise ValueError("Option type must be 'call' or 'put'")
     return price   
@@ -39,6 +39,13 @@ def get_data(ticker):
     # Download 1 year of historical data
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y")
+    try:
+        q = stock.info.get('dividendYield', 0)
+        if q is None: q = 0
+        if q > 1.0: 
+            q = q / 100
+    except:
+        q = 0
 
     #  Retrieve the latest closing price (Spot Price S)
     S = df['Close'].iloc[-1]
@@ -53,40 +60,43 @@ def get_data(ticker):
     # Annualize the volatility (multiply by square root of 252 trading days)
     sigma = daily_volatility * np.sqrt(252)
 
-    return S, sigma
+    return float(S), float(sigma), float(q)
 
 # ---- GREEKS ----
 
-def calculate_greeks(S, K, T, r, sigma, option_type="call"):
+def calculate_greeks(S, K, T, r, q, sigma, option_type="call"):
     """
     Calculates Delta, Gamma, Vega, Theta, and Rho.
     Optimized: Single conditional block for Call/Put logic.
     """
     # Common pre-calculations 
     sqrt_T = np.sqrt(T)
-    d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * sqrt_T)
+    d1 = (np.log(S / K) + (r - q + 0.5 * sigma ** 2) * T) / (sigma * sqrt_T)
     d2 = d1 - sigma * sqrt_T
+    exp_minus_qT = np.exp(-q * T)
+    exp_minus_rT = np.exp(-r * T)
     
     # Probability pre-calculations 
     pdf_d1 = norm.pdf(d1)
     cdf_d1 = norm.cdf(d1)
     cdf_d2 = norm.cdf(d2)
+    cdf_minus_d1 = norm.cdf(-d1)
     cdf_minus_d2 = norm.cdf(-d2)
     
     # GREEKS
-    gamma = pdf_d1 / (S * sigma * sqrt_T)
-    vega = S * sqrt_T * pdf_d1 * 0.01
-    theta_term1 = -(S * sigma * pdf_d1) / (2 * sqrt_T)
+    gamma = (pdf_d1 * exp_minus_qT) / (S * sigma * sqrt_T)
+    vega = S * exp_minus_qT * sqrt_T * pdf_d1 * 0.01
+    theta_term1 = -(S * exp_minus_qT * sigma * pdf_d1) / (2 * sqrt_T)
 
     if option_type.lower() == "call":
-        delta = cdf_d1
-        theta = theta_term1 - r * K * np.exp(-r * T) * cdf_d2
-        rho = K * T * np.exp(-r * T) * cdf_d2 * 0.01
+        delta = exp_minus_qT * cdf_d1
+        theta = theta_term1 + q * S * exp_minus_qT * cdf_d1 - r * K * exp_minus_rT * cdf_d2 
+        rho = K * T * exp_minus_rT * cdf_d2 * 0.01
         
-    elif option_type.lower() =="put":      
-        delta = cdf_d1 - 1
-        theta = theta_term1 + r * K * np.exp(-r * T) * cdf_minus_d2
-        rho = -K * T * np.exp(-r * T) * cdf_minus_d2 * 0.01
+    elif option_type.lower() == "put":      
+        delta = exp_minus_qT * (cdf_d1 - 1)
+        theta = theta_term1 - q * S * exp_minus_qT * cdf_minus_d1 + r * K * exp_minus_rT * cdf_minus_d2
+        rho = -K * T * exp_minus_rT * cdf_minus_d2 * 0.01
     else:
         raise ValueError("Option type must be 'call' or 'put'")
 
@@ -96,7 +106,7 @@ def calculate_greeks(S, K, T, r, sigma, option_type="call"):
 
 # ---- MONTE-CARLO ----
 
-def monte_carlo_simulation(S, K, T, r, sigma, N, option_type="call", time_steps=252, seed=None):
+def monte_carlo_simulation(S, K, T, r, q, sigma, N, option_type="call", time_steps=252, seed=None):
     """
     Simulates N price paths to visualize uncertainty using Geometric Brownian Motion (GBM).
     
@@ -110,17 +120,15 @@ def monte_carlo_simulation(S, K, T, r, sigma, N, option_type="call", time_steps=
     # Define the time increment (step size)
     dt = T / time_steps
 
-    # Initialize the price paths matrix (Rows: Time, Columns: Simulations)
-    S_paths = np.zeros((time_steps + 1, N))
-    S_paths[0] = S
-
     # Generate random shocks from a standard normal distribution
     # Using Z ~ N(0,1) for each step and simulation
     Z = np.random.standard_normal((time_steps,N))
 
-    for t in range(1,time_steps + 1):
-        # Update price based on risk-neutral drift and volatility shock
-        S_paths[t] = S_paths[t-1] * np.exp((r - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt)* Z[t-1])
+    drift = (r - q - 0.5 * sigma**2) * dt
+    shock = sigma * np.sqrt(dt) * Z
+    
+    log_returns = np.vstack([np.zeros(N), drift + shock])
+    S_paths = S * np.exp(np.cumsum(log_returns, axis=0))
 
     # Calculate the Payoff at maturity (T)
     last_prices = S_paths[-1]
@@ -141,7 +149,7 @@ def monte_carlo_simulation(S, K, T, r, sigma, N, option_type="call", time_steps=
 
 # ---- VALUE-AT-RISK ----
 
-def calculate_var(S_paths, K , T, r, option_type="call", confidence_level=0.95):
+def calculate_var(S_paths, K , T, r, q, sigma, option_type="call", confidence_level=0.95):
     """
     Calculates Value at Risk (VaR) at maturity based on Monte Carlo simulation.
     Returns the VaR value (loss amount) and the full P&L distribution.
@@ -161,18 +169,19 @@ def calculate_var(S_paths, K , T, r, option_type="call", confidence_level=0.95):
     simulated_option_prices = payoffs * np.exp(-r * T)
     
     # Calculate P&L (Profit & Loss) for each scenario
-    price_mean = np.mean(simulated_option_prices)
-    pnl_distribution = simulated_option_prices - price_mean
+    S_0 = S_paths[0, 0]
+    current_theoretical_price = black_scholes(S_0, K, T, r, q, sigma, option_type)
+    pnl_distribution = simulated_option_prices - current_theoretical_price
 
     #Calculate VaR
-    percentile_cutoff = (1-confidence_level)*100
+    percentile_cutoff = (1 - confidence_level)*100
     var_value = np.percentile(pnl_distribution, percentile_cutoff)
 
     return var_value, pnl_distribution
 
 # ---- IMPLIED VOLATILITY ----
 
-def calculate_implied_volatility(market_price, S, K, T, r, option_type="call"):
+def calculate_implied_volatility(market_price, S, K, T, r, q, option_type="call"):
     """
     Calculates the Implied Volatility using the Newton-Raphson numerical method.
     We seek the sigma such that: BlackScholes(sigma) - MarketPrice = 0
@@ -183,11 +192,11 @@ def calculate_implied_volatility(market_price, S, K, T, r, option_type="call"):
     
     for i in range (MAX_ITERATIONS):
         # Calculate theorical price based on sigma
-        price = black_scholes(S, K, T, r, sigma, option_type)
+        price = black_scholes(S, K, T, r, q, sigma, option_type)
 
         # Calculate Vega
-        d1 = (np.log(S / K)+( r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
-        vega = S * np.sqrt(T) * norm.pdf(d1)
+        d1 = (np.log(S / K)+( r - q + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+        vega = S * np.exp(-q * T) * np.sqrt(T) * norm.pdf(d1)
 
         diff = market_price - price
         if abs(diff) < PRECISION:
