@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-red)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
 > **Interactive Quantitative Finance tool bridging theoretical pricing models with practical risk management.**
 
 ---
