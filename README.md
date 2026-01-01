@@ -124,21 +124,18 @@ Option-Pricing-Dashboard/
 └── README.md                    # Project documentation
 ```
 ### Key File Descriptions
-dashboard.py The frontend of the application built with Streamlit. It orchestrates the calculation flow, renders interactive charts (Matplotlib/Seaborn), and manages the session state for a smooth user experience.
 
-models.py Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
+`dashboard.py` The frontend of the application built with Streamlit. It orchestrates the calculation flow, renders interactive charts (Matplotlib/Seaborn), and manages the session state for a smooth user experience.
 
-pricing_american_option.py The core computational engine for American Options. It implements advanced numerical methods:
+`models.py` Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
 
-Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
+`pricing_american_option.py` The core computational engine for American Options. It implements advanced numerical methods:
+*Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
+*Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
+*Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
+*Analytic Approximation: Bjerksund-Stensland (2002) model.
 
-Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
-
-Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
-
-Analytic Approximation: Bjerksund-Stensland (2002) model.
-
-test_models.py A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
+`test_models.py` A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
 
 ---
 
