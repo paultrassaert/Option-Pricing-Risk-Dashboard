@@ -109,14 +109,19 @@ Market prices are inverted using the Newton-Raphson root-finding algorithm to ex
 
 ## Project Structure
 
-```bash
-Option-Pricing-Risk-Dashboard/
-├── dashboard.py        # Entry point: Streamlit UI & Page layout
-├── models.py           # Core Logic: BS, Greeks, Monte Carlo, IV algorithms
-├── test_models.py      # Unit Tests: Pytest suite for math verification
-├── requirements.txt    # Dependencies list
-├── .gitignore          # Files to ignore (git configuration)
-└── README.md           # Documentation
+```text
+Option-Pricing-Dashboard/
+├── assets/
+│   └── overview.png             # Screenshots and diagrams for documentation
+├── dashboard.py                 # Main entry point: Streamlit UI, visualization logic, and user inputs
+├── models.py                    # European Library: Black-Scholes, Greeks, Implied Volatility, and yfinance data
+├── pricing_american_option.py   # American Library: Binomial/Trinomial Trees, PDE (FDM), and Longstaff-Schwartz
+├── test_models.py               # Unit Tests: Pytest suite to verify mathematical accuracy
+├── test_pricing_american.py     # Unit Tests: Pytest suite to verify mathematical accuracy
+├── requirements.txt             # List of Python dependencies
+├── .gitignore                   # Git configuration
+├── LICENSE                      # GPLv3 License
+└── README.md                    # Project documentation
 ```
 
 ---
