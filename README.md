@@ -82,6 +82,14 @@ Market prices are inverted using the Newton-Raphson root-finding algorithm to ex
 
 ## Installation & Setup
 
+### Live Demo
+You can access the dashboard directly online: 
+**[Live App on Streamlit Cloud](https://option-pricing-risk-dashboard-yq2vtuskwnu7ftueddnb78.streamlit.app)**
+
+ **Note on Cloud Version:** Due to Yahoo Finance API rate limits on shared cloud servers, real-time **Dividend Yield** data may occasionally fail to refresh or appear as 0. For a perfect, unrestricted experience with full live data, we recommend running the application locally.
+
+---
+
 **Prerequisites:** Python 3.8+
 
 1. **Clone the repository:**
