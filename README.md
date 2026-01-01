@@ -1,5 +1,5 @@
 # ⚡ Option Pricing & Risk Management Dashboard
-
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://option-pricing-risk-dashboard-yq2vtuskwnu7ftueddnb78.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30%2B-red)
 ![License](https://img.shields.io/badge/License-GPLv3-blue.svg)
