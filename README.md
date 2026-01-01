@@ -52,6 +52,9 @@ Black-Scholes-Merton provides the baseline for European valuations.
 
 <div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20C(S,t)=S_t%20e^{-q(T-t)}N(d_1)-Ke^{-r(T-t)}N(d_2)" alt="Black Scholes with Divs" /> </div>
 
+# Exemple pour le GBM
+$$dS_t = \mu S_t dt + \sigma S_t dW_t$$
+
 ### 2. Lattice Methods (American)
 We use the Cox-Ross-Rubinstein (CRR) binomial model. The price is solved via backward induction, checking for optimal exercise at every node.
 
