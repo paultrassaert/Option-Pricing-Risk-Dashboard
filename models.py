@@ -39,13 +39,31 @@ def get_data(ticker):
     # Download 1 year of historical data
     stock = yf.Ticker(ticker)
     df = stock.history(period="1y")
+    # Attempt to fetch yield via metadata (fast method but can be fragile)
     try:
-        q = stock.info.get('dividendYield', 0)
-        if q is None: q = 0
-        if q > 1.0: 
-            q = q / 100
-    except:
-        q = 0
+        # Try 'dividendYield' first, then 'trailingAnnualDividendYield' which is often more stable
+        q = stock.info.get('dividendYield') 
+        if q is None:
+            q = stock.info.get('trailingAnnualDividendYield', 0)
+    except Exception:
+        q = 0  # Fallback if Yahoo blocks the request
+
+    # If q is still 0, attempt to calculate it manually from historical dividends
+    if q == 0:
+        try:
+            divs = stock.dividends
+            if not divs.empty:
+                # Sum dividends from the last 365 days
+                cutoff_date = pd.Timestamp.now() - pd.Timedelta(days=365)
+                last_year_divs = divs[divs.index > cutoff_date].sum()
+                
+                # Fetch brief history to get current price for the yield calculation
+                history_temp = stock.history(period="1d")
+                if not history_temp.empty:
+                    current_close = history_temp['Close'].iloc[-1]
+                    q = last_year_divs / current_close
+        except Exception:
+            q = 0.02  # Safety default (e.g., for standard dividend stocks like KO)
 
     #  Retrieve the latest closing price (Spot Price S)
     S = df['Close'].iloc[-1]
