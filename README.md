@@ -130,10 +130,10 @@ Option-Pricing-Dashboard/
 `models.py` Handles the "Vanilla" components. It contains the analytical Black-Scholes formulas, exact Greeks calculations, and the connection to Yahoo Finance (yfinance) for real-time data retrieval.
 
 `pricing_american_option.py` The core computational engine for American Options. It implements advanced numerical methods:
-*Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
-*Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
-*Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
-*Analytic Approximation: Bjerksund-Stensland (2002) model.
+* Lattice Methods: Binomial (CRR) and Trinomial trees for discrete pricing.
+* Finite Difference Method (FDM): Solves the PDE using the Theta-scheme grid.
+* Monte Carlo: Longstaff-Schwartz algorithm (LSM) for stochastic path simulations.
+* Analytic Approximation: Bjerksund-Stensland (2002) model.
 
 `test_models.py` A rigorous testing suite using pytest. It verifies mathematical convergence (e.g., ensuring Monte Carlo converges to Black-Scholes) and validates edge cases (e.g., deep In-The-Money options) to ensure production-grade reliability.
 
