@@ -54,13 +54,20 @@ Black-Scholes-Merton provides the baseline for European valuations.
 <div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20C(S,t)=S_t%20e^{-q(T-t)}N(d_1)-Ke^{-r(T-t)}N(d_2)" alt="Black Scholes with Divs" /> </div>
 
 
-### 2. Lattice Methods (American)
-We use the Cox-Ross-Rubinstein (CRR) binomial model. The price is solved via backward induction, checking for optimal exercise at every node.
+### 2. Lattice Methods (Tree Models)
+We utilize discrete-time lattice models to handle the American early exercise feature.
 
-<div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20V_{i,j}=\max%20\left(%20Payoff(S_{i,j}),%20e^{-r\Delta%20t}(p%20V_{i+1,j+1}+(1-p)V_{i+1,j})%20\right)" alt="Binomial Backward Induction" /> </div>
+**A. Binomial Tree (Cox-Ross-Rubinstein)**
+The price is solved via backward induction checking for optimal exercise at every node considering two possible moves (Up/Down).
 
+<div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20V_{t}=\max%20\left(%20Payoff(S_{t}),%20e^{-r\Delta%20t}(p%20V_{u}+(1-p)V_{d})%20\right)" alt="Binomial Backward Induction" /> </div>
 
-Where <em>p</em> is the risk-neutral probability derived from the volatility <em>σ</em>.
+**B. Trinomial Tree**
+This model allows for three state transitions (Up, Flat, Down) at each time step. It converges faster and with less oscillation than the binomial model.
+
+<div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20V_{t}=\max%20\left(%20Payoff(S_{t}),%20e^{-r\Delta%20t}(p_u%20V_{u}+p_m%20V_{m}+p_d%20V_{d})%20\right)" alt="Trinomial Backward Induction" /> </div>
+
+Where $p_u, p_m, p_d$ are the risk-neutral probabilities derived from the volatility $\sigma$ and drift.
 
 ### 3. Finite Difference Method (PDE)
 For high-precision pricing, we solve the generalized Black-Scholes Partial Differential Equation using the Theta-Scheme (allowing generic switching between Explicit, Implicit, and Crank-Nicolson methods).
