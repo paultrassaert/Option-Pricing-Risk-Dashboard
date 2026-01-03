@@ -75,7 +75,11 @@ Implemented via the Longstaff-Schwartz (2001) algorithm. We approximate the cond
 
 <div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20E[V_{t+1}|S_t]%20\approx%20\sum_{k=0}^{3}%20\beta_k%20L_k(S_t)" alt="Longstaff Schwartz Regression" /> </div>
 
-### 5. Implied Volatility Calibration
+### 5. Analytical Approximation (Bjerksund-Stensland 2002)This model provides a highly efficient closed-form approximation for American options. It divides the time to maturity into two periods to estimate a flat early exercise boundary ($I$), avoiding the computational cost of iterative trees or grids.
+
+<div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20C_{BS2002}%20\approx%20\alpha%20C_{BS}(S)%20%2B%20(1-\alpha)%20(S-I)^%2B" alt="Bjerksund Stensland Logic" /> </div>
+
+### 6. Implied Volatility Calibration
 Market prices are inverted using the Newton-Raphson root-finding algorithm to extract the implied volatility surface.
 
 <div align="center"> <img src="https://math.vercel.app/?from=\color{black}\Large%20\sigma_{n+1}=\sigma_n-\frac{C_{model}(\sigma_n)-C_{market}}{\mathcal{V}(\sigma_n)}" alt="Newton Raphson" /> </div>
