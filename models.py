@@ -65,6 +65,9 @@ def get_data(ticker):
         except Exception:
             q = 0.02  # Safety default (e.g., for standard dividend stocks like KO)
 
+    if q > 1.0:
+        q = q / 100
+
     #  Retrieve the latest closing price (Spot Price S)
     S = df['Close'].iloc[-1]
 
